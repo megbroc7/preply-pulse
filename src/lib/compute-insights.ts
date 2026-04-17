@@ -136,7 +136,7 @@ export function generateInsights(data: {
     insights.push({
       title: "Strong trial conversion",
       body: `Your trial-to-paid conversion is ${(convRate * 100).toFixed(1)}%. That's solid.`,
-      type: "success",
+      type: "warning",
     });
   } else if (convRate < 0.5) {
     insights.push({
@@ -167,7 +167,7 @@ export function generateInsights(data: {
       insights.push({
         title: "Revenue concentration",
         body: `Your top 5 students account for ${top5Pct.toFixed(1)}% of your earnings. Great students, but watch the concentration risk.`,
-        type: top5Pct > 60 ? "warning" : "info",
+        type: "success",
       });
     }
   }
@@ -194,7 +194,7 @@ export function generateInsights(data: {
     insights.push({
       title: "Reactivation opportunity",
       body: `You have ${data.reactivation.length} former students who took 5+ lessons and have gone quiet. If just the top 10 came back for 4 lessons each, that's ~$${potentialEarnings.toFixed(0)} in potential revenue.`,
-      type: "info",
+      type: "purple",
     });
   }
 

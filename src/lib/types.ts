@@ -147,7 +147,7 @@ export interface LTVPoint {
 export interface InsightCallout {
   title: string;
   body: string;
-  type: "info" | "warning" | "success";
+  type: "info" | "warning" | "success" | "purple";
 }
 
 export interface ProcessedData {

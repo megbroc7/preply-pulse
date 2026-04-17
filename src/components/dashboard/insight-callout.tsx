@@ -4,6 +4,7 @@ const STYLES = {
   info: "bg-blue-50 border-blue-200 text-blue-900",
   warning: "bg-amber-50 border-amber-200 text-amber-900",
   success: "bg-emerald-50 border-emerald-200 text-emerald-900",
+  purple: "bg-purple-50 border-purple-200 text-purple-900",
 };
 
 export function InsightCallout({ title, body, type }: InsightCalloutType) {
