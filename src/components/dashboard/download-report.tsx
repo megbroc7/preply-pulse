@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState, type RefObject } from "react";
+import { track } from "@vercel/analytics/react";
 import { Button } from "@/components/ui/button";
 
 interface DownloadReportProps {
@@ -47,6 +48,7 @@ export function DownloadReport({ exportRef, onExportStateChange }: DownloadRepor
       link.download = `preplypulse-report-${new Date().toISOString().split("T")[0]}.png`;
       link.href = dataUrl;
       link.click();
+      track("report_downloaded");
     } catch (e) {
       console.error("Export failed:", e);
     } finally {
