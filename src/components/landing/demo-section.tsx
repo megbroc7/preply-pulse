@@ -48,6 +48,22 @@ export function DemoSection() {
         trials: <TabTrials data={data} />,
         actions: <TabActions data={data} />,
       }} />
+      <div className="max-w-xl mx-auto text-center mt-12 px-4">
+        <p className="text-gray-500 text-sm leading-relaxed">
+          If you found this helpful, consider{" "}
+          <a
+            href="https://buymeacoffee.com/preplypulse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
+          >
+            buying me an espresso
+          </a>{" "}
+          to support the project. I built this for free because I think every tutor
+          deserves to see their numbers clearly. The more caffeinated I am, the more
+          helpful I am.
+        </p>
+      </div>
     </section>
   );
 }
