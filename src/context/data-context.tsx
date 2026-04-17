@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { track } from "@vercel/analytics";
 import { parseCSV } from "@/lib/parse-csv";
 import { processData } from "@/lib/process-data";
 import type { ProcessedData } from "@/lib/types";
@@ -38,6 +39,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
       const processed = processData(parseResult.data);
       setData(processed);
       setIsDemo(false);
+      track("csv_uploaded", {
+        totalLessons: processed.totalLessons,
+        totalStudents: processed.totalStudents,
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "An unexpected error occurred while processing your data.");
     } finally {
