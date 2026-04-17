@@ -127,4 +127,20 @@
   html {
     @apply font-sans;
   }
+
+  :root {
+    --preply-pink: 330 85% 66%;
+    --preply-pink-light: 330 85% 95%;
+    --preply-pink-dark: 330 85% 50%;
+    --font-heading: var(--font-dm-sans);
+    --font-body: var(--font-inter);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  body {
+    font-family: var(--font-body);
+  }
 }
