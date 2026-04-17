@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Inter } from "next/font/google";
 import "./globals.css";
+import { DataProvider } from "@/context/data-context";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -30,7 +31,7 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${inter.variable} font-sans antialiased`}
       >
-        {children}
+        <DataProvider>{children}</DataProvider>
       </body>
     </html>
   );
