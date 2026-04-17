@@ -24,7 +24,7 @@ export function Footer({ lessonCount }: FooterProps) {
         </p>
         <div className="flex items-center justify-center gap-5 text-sm">
           <a
-            href="https://buymeacoffee.com"
+            href="https://buymeacoffee.com/preplypulse"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-amber-600 hover:text-amber-700 transition-colors font-medium"
