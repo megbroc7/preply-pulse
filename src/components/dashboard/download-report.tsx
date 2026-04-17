@@ -9,15 +9,23 @@ export function DownloadReport() {
   const handleExport = useCallback(async () => {
     setIsExporting(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
+      const { toPng } = await import("html-to-image");
       const dashboardEl = document.getElementById("dashboard-content");
       if (!dashboardEl) return;
-      const canvas = await html2canvas(dashboardEl, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+
+      const dataUrl = await toPng(dashboardEl, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: "#ffffff",
+      });
+
       const link = document.createElement("a");
       link.download = `preplypulse-report-${new Date().toISOString().split("T")[0]}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = dataUrl;
       link.click();
-    } catch { /* silently fail */ } finally {
+    } catch (e) {
+      console.error("Export failed:", e);
+    } finally {
       setIsExporting(false);
     }
   }, []);
