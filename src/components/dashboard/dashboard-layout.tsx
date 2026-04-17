@@ -1,0 +1,71 @@
+"use client";
+
+import { useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useData } from "@/context/data-context";
+import { Button } from "@/components/ui/button";
+import { DownloadReport } from "./download-report";
+
+const TABS = [
+  { key: "overview", label: "Overview" },
+  { key: "students", label: "Students" },
+  { key: "growth", label: "Growth" },
+  { key: "trials", label: "Trials" },
+  { key: "actions", label: "Take Action" },
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
+
+interface DashboardLayoutProps {
+  tabs: Record<TabKey, ReactNode>;
+  demoBanner?: boolean;
+}
+
+export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
+  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const { reset } = useData();
+  const router = useRouter();
+
+  const handleReset = () => { reset(); router.push("/"); };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {demoBanner && (
+        <div className="bg-[hsl(var(--preply-pink-light))] text-center py-2 text-sm">
+          This is sample data. Upload yours to see your real insights.
+        </div>
+      )}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <h1 className="text-xl font-bold font-[family-name:var(--font-dm-sans)]">
+              <span className="text-[hsl(var(--preply-pink))]">Preply</span>Pulse
+            </h1>
+            <div className="flex items-center gap-3">
+              <DownloadReport />
+              <Button variant="ghost" size="sm" onClick={handleReset}>Upload New File</Button>
+            </div>
+          </div>
+          <nav className="flex gap-1 -mb-px">
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.key
+                    ? "border-[hsl(var(--preply-pink))] text-[hsl(var(--preply-pink))]"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </header>
+      <main id="dashboard-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {tabs[activeTab]}
+      </main>
+    </div>
+  );
+}
