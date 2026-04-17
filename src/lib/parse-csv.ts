@@ -1,0 +1,74 @@
+import Papa from "papaparse";
+import type { RawLesson } from "./types";
+
+const REQUIRED_COLUMNS = [
+  "Service Type", "Student", "Student Location", "Lesson Date",
+  "Date Confirmed", "Type", "Lesson Price, USD", "Tutor Payout, %", "Earning, USD",
+];
+
+export function validateColumns(headers: string[]): { valid: boolean; missing: string[] } {
+  const normalized = headers.map((h) => h.trim());
+  const missing = REQUIRED_COLUMNS.filter((col) => !normalized.includes(col));
+  return { valid: missing.length === 0, missing };
+}
+
+function parseDateValue(value: string): Date {
+  const trimmed = value.trim();
+  const [datePart, timePart] = trimmed.split(" ");
+  const [month, day, year] = datePart.split("/").map(Number);
+  const fullYear = year < 100 ? 2000 + year : year;
+  if (timePart) {
+    const [hours, minutes] = timePart.split(":").map(Number);
+    return new Date(fullYear, month - 1, day, hours, minutes);
+  }
+  return new Date(fullYear, month - 1, day);
+}
+
+function parseNumericOrNull(value: string): number | null {
+  const trimmed = value.trim();
+  if (trimmed === "-" || trimmed === "") return null;
+  const num = parseFloat(trimmed);
+  return isNaN(num) ? null : num;
+}
+
+type ParseResult =
+  | { success: true; data: RawLesson[] }
+  | { success: false; error: string };
+
+export function parseCSV(csvString: string): ParseResult {
+  if (!csvString.trim()) {
+    return { success: false, error: "File is empty." };
+  }
+
+  const parsed = Papa.parse<Record<string, string>>(csvString, {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  if (parsed.errors.length > 0 && parsed.data.length === 0) {
+    return { success: false, error: `CSV parsing failed: ${parsed.errors[0].message}` };
+  }
+
+  const headers = parsed.meta.fields || [];
+  const validation = validateColumns(headers);
+  if (!validation.valid) {
+    return {
+      success: false,
+      error: `Missing required columns: ${validation.missing.join(", ")}. Make sure you're uploading the tutor activity report from Preply.`,
+    };
+  }
+
+  const lessons: RawLesson[] = parsed.data.map((row) => ({
+    serviceType: row["Service Type"]?.trim() || "",
+    student: row["Student"]?.trim() || "Unknown",
+    studentLocation: row["Student Location"]?.trim() || "Unknown",
+    lessonDate: parseDateValue(row["Lesson Date"] || ""),
+    dateConfirmed: parseDateValue(row["Date Confirmed"] || ""),
+    type: row["Type"]?.trim() as "Trial" | "Non-trial lesson",
+    lessonPriceUSD: parseFloat(row["Lesson Price, USD"] || "0"),
+    tutorPayoutPercent: parseNumericOrNull(row["Tutor Payout, %"] || "-"),
+    earningUSD: parseNumericOrNull(row["Earning, USD"] || "-"),
+  }));
+
+  return { success: true, data: lessons };
+}
