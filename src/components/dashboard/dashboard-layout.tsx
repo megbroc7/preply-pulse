@@ -26,7 +26,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
   const { reset } = useData();
   const router = useRouter();
 
-  const handleReset = () => { reset(); router.push("/"); };
+  const handleReset = () => { reset(); router.push("/#upload"); };
 
   return (
     <div className="min-h-screen bg-gray-50">

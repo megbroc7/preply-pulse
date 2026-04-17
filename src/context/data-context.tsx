@@ -8,6 +8,7 @@ import type { ProcessedData } from "@/lib/types";
 interface DataContextType {
   data: ProcessedData | null;
   isDemo: boolean;
+  didReset: boolean;
   error: string | null;
   isLoading: boolean;
   loadCSV: (csvString: string) => void;
@@ -22,6 +23,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [isDemo, setIsDemo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [didReset, setDidReset] = useState(false);
 
   const loadCSV = useCallback((csvString: string) => {
     setIsLoading(true);
@@ -62,10 +64,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setData(null);
     setIsDemo(false);
     setError(null);
+    setDidReset(true);
   }, []);
 
   return (
-    <DataContext.Provider value={{ data, isDemo, error, isLoading, loadCSV, loadDemo, reset }}>
+    <DataContext.Provider value={{ data, isDemo, didReset, error, isLoading, loadCSV, loadDemo, reset }}>
       {children}
     </DataContext.Provider>
   );

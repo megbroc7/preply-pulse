@@ -10,11 +10,14 @@ import { TabTrials } from "@/components/dashboard/tab-trials";
 import { TabActions } from "@/components/dashboard/tab-actions";
 
 export function DemoSection() {
-  const { data, loadDemo, isLoading } = useData();
+  const { data, loadDemo, isLoading, didReset } = useData();
 
-  useEffect(() => { loadDemo(); }, [loadDemo]);
+  useEffect(() => {
+    if (!didReset) loadDemo();
+  }, [loadDemo, didReset]);
 
-  if (isLoading || !data) {
+  if (didReset || isLoading || !data) {
+    if (didReset) return null;
     return (
       <section className="py-16 px-4">
         <div className="flex items-center justify-center gap-2 text-gray-400">
