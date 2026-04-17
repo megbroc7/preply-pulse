@@ -14,6 +14,20 @@ export function validateColumns(headers: string[]): { valid: boolean; missing: s
 
 function parseDateValue(value: string): Date {
   const trimmed = value.trim();
+  if (trimmed === "-" || trimmed === "") return new Date(0);
+
+  // ISO-ish format: 2024-09-24 14:00:00
+  if (trimmed.includes("-") && trimmed.length >= 10) {
+    const [datePart, timePart] = trimmed.split(" ");
+    const [year, month, day] = datePart.split("-").map(Number);
+    if (timePart) {
+      const [hours, minutes] = timePart.split(":").map(Number);
+      return new Date(year, month - 1, day, hours, minutes);
+    }
+    return new Date(year, month - 1, day);
+  }
+
+  // US short format: 9/24/24 14:00
   const [datePart, timePart] = trimmed.split(" ");
   const [month, day, year] = datePart.split("/").map(Number);
   const fullYear = year < 100 ? 2000 + year : year;
@@ -31,8 +45,13 @@ function parseNumericOrNull(value: string): number | null {
   return isNaN(num) ? null : num;
 }
 
+function isActualLesson(type: string): boolean {
+  const t = type.trim();
+  return t === "Trial" || t === "Non-trial lesson";
+}
+
 type ParseResult =
-  | { success: true; data: RawLesson[] }
+  | { success: true; data: RawLesson[]; skipped: number }
   | { success: false; error: string };
 
 export function parseCSV(csvString: string): ParseResult {
@@ -58,17 +77,29 @@ export function parseCSV(csvString: string): ParseResult {
     };
   }
 
-  const lessons: RawLesson[] = parsed.data.map((row) => ({
-    serviceType: row["Service Type"]?.trim() || "",
-    student: row["Student"]?.trim() || "Unknown",
-    studentLocation: row["Student Location"]?.trim() || "Unknown",
-    lessonDate: parseDateValue(row["Lesson Date"] || ""),
-    dateConfirmed: parseDateValue(row["Date Confirmed"] || ""),
-    type: row["Type"]?.trim() as "Trial" | "Non-trial lesson",
-    lessonPriceUSD: parseFloat(row["Lesson Price, USD"] || "0"),
-    tutorPayoutPercent: parseNumericOrNull(row["Tutor Payout, %"] || "-"),
-    earningUSD: parseNumericOrNull(row["Earning, USD"] || "-"),
-  }));
+  let skipped = 0;
+  const lessons: RawLesson[] = [];
 
-  return { success: true, data: lessons };
+  for (const row of parsed.data) {
+    const type = row["Type"]?.trim() || "";
+
+    if (!isActualLesson(type)) {
+      skipped++;
+      continue;
+    }
+
+    lessons.push({
+      serviceType: row["Service Type"]?.trim() || "",
+      student: row["Student"]?.trim() || "Unknown",
+      studentLocation: row["Student Location"]?.trim() || "Unknown",
+      lessonDate: parseDateValue(row["Lesson Date"] || ""),
+      dateConfirmed: parseDateValue(row["Date Confirmed"] || ""),
+      type: type as "Trial" | "Non-trial lesson",
+      lessonPriceUSD: parseFloat(row["Lesson Price, USD"] || "0"),
+      tutorPayoutPercent: parseNumericOrNull(row["Tutor Payout, %"] || "-"),
+      earningUSD: parseNumericOrNull(row["Earning, USD"] || "-"),
+    });
+  }
+
+  return { success: true, data: lessons, skipped };
 }
