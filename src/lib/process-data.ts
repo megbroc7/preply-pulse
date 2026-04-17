@@ -455,6 +455,7 @@ export function processData(lessons: RawLesson[]): ProcessedData {
     avgPaidLessonPrice,
     reactivation,
     pricingOpportunities,
+    raw: sorted,
   });
 
   return {

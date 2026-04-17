@@ -128,6 +128,7 @@ export function generateInsights(data: {
   avgPaidLessonPrice: number;
   reactivation: ReactivationCandidate[];
   pricingOpportunities: PricingOpportunity[];
+  raw: RawLesson[];
 }): InsightCallout[] {
   const insights: InsightCallout[] = [];
 
@@ -205,6 +206,65 @@ export function generateInsights(data: {
       body: `You have ${data.pricingOpportunities.length} active students on rates below your current median. A $10 increase across this group would add ~$${totalUplift.toFixed(0)}/month to your earnings.`,
       type: "info",
     });
+  }
+
+  // Geographic insight
+  const studentsWithEarnings = data.students.filter((s) => s.earningsUSD > 0);
+  if (studentsWithEarnings.length >= 5) {
+    const byCountry = new Map<string, { earnings: number; count: number }>();
+    for (const s of studentsWithEarnings) {
+      const loc = s.studentLocation;
+      const entry = byCountry.get(loc) || { earnings: 0, count: 0 };
+      entry.earnings += s.earningsUSD;
+      entry.count++;
+      byCountry.set(loc, entry);
+    }
+    const sorted = [...byCountry.entries()].sort((a, b) => b[1].earnings - a[1].earnings);
+    if (sorted.length >= 2) {
+      const top2 = sorted.slice(0, 2);
+      const top2Pct = ((top2[0][1].earnings + top2[1][1].earnings) / data.totalEarnings) * 100;
+      if (top2Pct > 30) {
+        insights.push({
+          title: "Geographic sweet spot",
+          body: `Your highest-earning students come from ${top2[0][0]} (${top2[0][1].count} students) and ${top2[1][0]} (${top2[1][1].count} students), accounting for ${top2Pct.toFixed(0)}% of your earnings. Consider protecting time slots that work for these regions.`,
+          type: "info",
+        });
+      }
+    }
+  }
+
+  // Repeat booking rate
+  if (data.monthlyTrends.length >= 2) {
+    const paidLessons = data.raw.filter((l) => l.type === "Non-trial lesson");
+    const lastMonth = data.monthlyTrends[data.monthlyTrends.length - 1];
+    const prevMonth = data.monthlyTrends[data.monthlyTrends.length - 2];
+
+    const studentsInMonth = (month: string) => {
+      const set = new Set<string>();
+      for (const l of paidLessons) {
+        const m = `${l.lessonDate.getFullYear()}-${String(l.lessonDate.getMonth() + 1).padStart(2, "0")}`;
+        if (m === month) set.add(l.student);
+      }
+      return set;
+    };
+
+    const lastStudents = studentsInMonth(lastMonth.month);
+    const prevStudents = studentsInMonth(prevMonth.month);
+
+    if (lastStudents.size >= 3) {
+      let returning = 0;
+      for (const s of lastStudents) {
+        if (prevStudents.has(s)) returning++;
+      }
+      const repeatRate = (returning / lastStudents.size) * 100;
+      if (repeatRate > 0) {
+        insights.push({
+          title: repeatRate >= 60 ? "Strong repeat booking" : "Repeat booking rate",
+          body: `${repeatRate.toFixed(0)}% of your students last month also booked the month before. ${repeatRate >= 60 ? "That's a stable income base." : "Building more recurring students would stabilize your income."}`,
+          type: repeatRate >= 60 ? "success" : "info",
+        });
+      }
+    }
   }
 
   return insights;
