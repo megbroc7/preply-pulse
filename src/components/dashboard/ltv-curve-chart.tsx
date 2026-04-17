@@ -69,7 +69,7 @@ export function LTVCurveChart({ data }: LTVCurveChartProps) {
         </LineChart>
       </ResponsiveContainer>
       <p className="text-sm text-muted-foreground">
-        This curve shows average cumulative earnings as students progress through lessons. The slope indicates how quickly earnings compound — a steep early curve suggests strong retention value per additional lesson.
+        This curve shows average cumulative earnings as students progress through lessons. A steep early slope suggests strong retention value per additional lesson.
       </p>
     </div>
   );

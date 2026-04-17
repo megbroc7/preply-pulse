@@ -22,7 +22,7 @@ export function ReactivationList({ candidates }: ReactivationListProps) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        These are warm leads — students who completed paid lessons with you but have gone quiet. A
+        These are warm leads: students who completed paid lessons with you but have gone quiet. A
         short personal message can bring them back.
       </p>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

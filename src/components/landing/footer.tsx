@@ -19,7 +19,7 @@ export function Footer({ lessonCount }: FooterProps) {
           </span>
         </div>
         <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-          A Preply tutor with {count}&nbsp;lessons taught — who built this tool so
+          A Preply tutor with {count}&nbsp;lessons taught who built this tool so
           you don&apos;t have to figure out the business side alone.
         </p>
         <div className="flex items-center justify-center gap-5 text-sm">

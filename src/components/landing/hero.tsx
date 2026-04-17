@@ -25,7 +25,7 @@ export function Hero() {
         </h1>
 
         <p className="mt-8 text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
-          Upload your Preply activity CSV and see what&apos;s actually driving your income —
+          Upload your Preply activity CSV and see what&apos;s actually driving your income:
           <span className="text-gray-900 font-medium"> retention</span>,
           <span className="text-gray-900 font-medium"> pricing</span>,
           <span className="text-gray-900 font-medium"> student quality</span>, and
@@ -61,7 +61,7 @@ export function Hero() {
             className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
           />
           <span className="text-[13px] text-gray-500">
-            Made by <span className="font-medium text-gray-700">Megan B.</span> — a Preply tutor, for Preply tutors
+            Made by <span className="font-medium text-gray-700">Megan B.</span>, a Preply tutor, for Preply tutors
           </span>
         </div>
       </div>
