@@ -1,12 +1,26 @@
-export function Footer() {
+interface FooterProps {
+  lessonCount?: number;
+}
+
+export function Footer({ lessonCount }: FooterProps) {
+  const count = lessonCount ? lessonCount.toLocaleString("en-US") : "2,000+";
+
   return (
     <footer className="py-16 px-4 border-t border-gray-100">
       <div className="max-w-3xl mx-auto text-center space-y-6">
-        <p className="text-sm text-gray-900 font-medium font-[family-name:var(--font-dm-sans)]">
-          Built by Megan B.
-        </p>
+        <div className="inline-flex items-center gap-3 rounded-full bg-white/80 border border-gray-100 pl-1.5 pr-5 py-1.5 shadow-sm">
+          <img
+            src="https://avatars.preply.com/i/logos/i/logos/avatar_chr62d0iny.jpg"
+            alt="Megan B."
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
+          />
+          <span className="text-sm text-gray-900 font-medium font-[family-name:var(--font-dm-sans)]">
+            Built by Megan B.
+          </span>
+        </div>
         <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-          A Preply tutor who spent 2,118 hours learning the business side — and built this tool so you don&apos;t have to figure it out alone.
+          A Preply tutor with {count}&nbsp;lessons taught — who built this tool so
+          you don&apos;t have to figure out the business side alone.
         </p>
         <div className="flex items-center justify-center gap-5 text-sm">
           <a

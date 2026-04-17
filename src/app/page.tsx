@@ -4,8 +4,11 @@ import { DemoSection } from "@/components/landing/demo-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { UploadSection } from "@/components/landing/upload-section";
 import { Footer } from "@/components/landing/footer";
+import { fetchPreplyStats } from "@/lib/preply-stats";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const stats = await fetchPreplyStats();
+
   return (
     <main>
       <CoffeeButton />
@@ -13,7 +16,7 @@ export default function HomePage() {
       <DemoSection />
       <HowItWorks />
       <UploadSection />
-      <Footer />
+      <Footer lessonCount={stats.lessonCount} />
     </main>
   );
 }
