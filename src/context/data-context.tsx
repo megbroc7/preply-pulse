@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { track } from "@vercel/analytics";
+import { track } from "@vercel/analytics/react";
 import { parseCSV } from "@/lib/parse-csv";
 import { processData } from "@/lib/process-data";
 import type { ProcessedData } from "@/lib/types";
