@@ -2,6 +2,7 @@
 
 import { useState, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics/react";
 import { useData } from "@/context/data-context";
 import { Button } from "@/components/ui/button";
 import { DownloadReport } from "./download-report";
@@ -59,7 +60,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
             {TABS.map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => { setActiveTab(tab.key); track("tab_clicked", { tab: tab.key }); }}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.key
                     ? "border-[hsl(var(--preply-pink))] text-[hsl(var(--preply-pink))]"

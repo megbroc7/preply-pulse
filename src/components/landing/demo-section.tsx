@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { track } from "@vercel/analytics/react";
 import { useData } from "@/context/data-context";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { TabOverview } from "@/components/dashboard/tab-overview";
@@ -55,6 +56,7 @@ export function DemoSection() {
             href="https://buymeacoffee.com/preplypulse"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track("espresso_clicked", { location: "demo_section" })}
             className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
           >
             buying me an espresso

@@ -1,3 +1,7 @@
+"use client";
+
+import { track } from "@vercel/analytics/react";
+
 interface FooterProps {
   lessonCount?: number;
 }
@@ -27,6 +31,7 @@ export function Footer({ lessonCount }: FooterProps) {
             href="https://buymeacoffee.com/preplypulse"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track("espresso_clicked", { location: "footer" })}
             className="inline-flex items-center gap-1.5 text-amber-600 hover:text-amber-700 transition-colors font-medium"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -40,6 +45,7 @@ export function Footer({ lessonCount }: FooterProps) {
             href="https://www.reddit.com/r/Preply/comments/1smgs0s/lessons_learned_after_2118_hours_on_preply/"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => track("reddit_post_clicked")}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             Read the Reddit post
