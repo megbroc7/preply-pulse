@@ -72,7 +72,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
       {isExporting && (
         <div
           ref={exportRef}
-          className="fixed left-[-9999px] top-0 w-[1200px] bg-white"
+          className="absolute left-0 top-0 w-[1200px] bg-white -z-10 opacity-0"
           aria-hidden="true"
         >
           {TABS.map((tab) => (
