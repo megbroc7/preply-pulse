@@ -1,4 +1,5 @@
 import { CSVUploader } from "@/components/upload/csv-uploader";
+import { CSVGuide } from "@/components/upload/csv-guide";
 
 export function UploadSection() {
   return (
@@ -15,6 +16,7 @@ export function UploadSection() {
           Your data stays on your device. Always.
         </p>
         <CSVUploader />
+        <CSVGuide />
       </div>
     </section>
   );
