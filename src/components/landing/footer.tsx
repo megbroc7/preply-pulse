@@ -37,7 +37,7 @@ export function Footer({ lessonCount }: FooterProps) {
           </a>
           <span className="w-px h-4 bg-gray-200" />
           <a
-            href="#"
+            href="https://www.reddit.com/r/Preply/comments/1smgs0s/lessons_learned_after_2118_hours_on_preply/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-gray-600 transition-colors"
