@@ -19,7 +19,22 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "PreplyPulse — Insights for Preply Tutors",
   description:
-    "Upload your Preply activity CSV and get actionable business insights. Made by a Preply tutor, for Preply tutors.",
+    "Stop chasing trials. Upload your Preply activity CSV and see what's actually driving your income. Free, private, no sign-up. Made by a Preply tutor, for Preply tutors.",
+  metadataBase: new URL("https://preplypulse.com"),
+  openGraph: {
+    title: "PreplyPulse — Stop chasing trials. Start reading your numbers.",
+    description:
+      "Upload your Preply CSV and instantly see retention, pricing, student quality, and where your income actually comes from. Free and 100% private.",
+    url: "https://preplypulse.com",
+    siteName: "PreplyPulse",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PreplyPulse — Stop chasing trials. Start reading your numbers.",
+    description:
+      "Upload your Preply CSV and instantly see retention, pricing, student quality, and where your income actually comes from.",
+  },
 };
 
 export default function RootLayout({
