@@ -1,12 +1,14 @@
 "use client";
 
 import { track } from "@vercel/analytics/react";
+import { useLocale } from "@/context/locale-context";
 
 interface FooterProps {
   lessonCount?: number;
 }
 
 export function Footer({ lessonCount }: FooterProps) {
+  const { t } = useLocale();
   const count = lessonCount ? lessonCount.toLocaleString("en-US") : "2,000+";
 
   return (
@@ -19,12 +21,11 @@ export function Footer({ lessonCount }: FooterProps) {
             className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
           />
           <span className="text-sm text-gray-900 font-medium font-[family-name:var(--font-dm-sans)]">
-            Built by Megan B.
+            {t("builtBy")}
           </span>
         </div>
         <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-          A Preply tutor with {count}&nbsp;lessons taught who built this tool so
-          you don&apos;t have to figure out the business side alone.
+          A Preply tutor with {count}&nbsp;{t("footerLessons")}
         </p>
         <div className="flex items-center justify-center gap-5 text-sm">
           <a
@@ -38,7 +39,7 @@ export function Footer({ lessonCount }: FooterProps) {
               <path d="M5 11h12a3 3 0 0 1 0 6h-1v1a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-7Z" fill="#FBBF24" stroke="#D97706" strokeWidth="1.5" strokeLinejoin="round" />
               <path d="M17 11h1a3 3 0 0 1 0 6h-1" stroke="#D97706" strokeWidth="1.5" />
             </svg>
-            Buy me a coffee
+            {t("footerBuyMeCoffee")}
           </a>
           <span className="w-px h-4 bg-gray-200" />
           <a
@@ -48,13 +49,11 @@ export function Footer({ lessonCount }: FooterProps) {
             onClick={() => track("reddit_post_clicked")}
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            Read the Reddit post
+            {t("footerReddit")}
           </a>
         </div>
         <div className="pt-6">
-          <p className="text-xs text-gray-300">
-            PreplyPulse is not affiliated with Preply. Your data is processed entirely in your browser.
-          </p>
+          <p className="text-xs text-gray-300">{t("footerDisclaimer")}</p>
         </div>
       </div>
     </footer>

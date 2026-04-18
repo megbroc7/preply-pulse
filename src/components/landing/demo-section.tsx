@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { track } from "@vercel/analytics/react";
 import { useData } from "@/context/data-context";
+import { useLocale } from "@/context/locale-context";
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout";
 import { TabOverview } from "@/components/dashboard/tab-overview";
 import { TabStudents } from "@/components/dashboard/tab-students";
@@ -12,6 +13,7 @@ import { TabActions } from "@/components/dashboard/tab-actions";
 
 export function DemoSection() {
   const { data, loadDemo, isLoading, didReset } = useData();
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!didReset) loadDemo();
@@ -23,7 +25,7 @@ export function DemoSection() {
       <section className="py-16 px-4">
         <div className="flex items-center justify-center gap-2 text-gray-400">
           <div className="w-4 h-4 rounded-full border-2 border-pink-200 border-t-[hsl(var(--preply-pink))] animate-spin" />
-          Loading demo...
+          Loading...
         </div>
       </section>
     );
@@ -33,14 +35,12 @@ export function DemoSection() {
     <section id="demo" className="py-16">
       <div className="text-center mb-10">
         <p className="text-[13px] font-medium tracking-widest uppercase text-[hsl(var(--preply-pink))] mb-3">
-          Live preview
+          {t("demoLabel")}
         </p>
         <h2 className="text-2xl md:text-3xl font-bold font-[family-name:var(--font-dm-sans)]">
-          See what you&apos;ll get
+          {t("demoTitle")}
         </h2>
-        <p className="text-gray-400 mt-2 text-sm">
-          This is anonymized sample data. Upload yours for the real thing.
-        </p>
+        <p className="text-gray-400 mt-2 text-sm">{t("demoSubtitle")}</p>
       </div>
       <DashboardLayout demoBanner tabs={{
         overview: <TabOverview data={data} />,
@@ -51,7 +51,7 @@ export function DemoSection() {
       }} />
       <div className="max-w-xl mx-auto text-center mt-12 px-4">
         <p className="text-gray-500 text-sm leading-relaxed">
-          If you found this helpful, consider{" "}
+          {t("demoEspresso")}{" "}
           <a
             href="https://buymeacoffee.com/preplypulse"
             target="_blank"
@@ -59,11 +59,9 @@ export function DemoSection() {
             onClick={() => track("espresso_clicked", { location: "demo_section" })}
             className="text-amber-600 hover:text-amber-700 font-medium transition-colors"
           >
-            buying me an espresso
+            {t("demoEspressoLink")}
           </a>{" "}
-          to support the project. I built this for free because I think every tutor
-          deserves to see their numbers clearly. The more caffeinated I am, the more
-          helpful I am.
+          {t("demoEspressoEnd")}
         </p>
       </div>
     </section>

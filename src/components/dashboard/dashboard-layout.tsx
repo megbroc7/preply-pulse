@@ -4,15 +4,17 @@ import { useState, useRef, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@vercel/analytics/react";
 import { useData } from "@/context/data-context";
+import { useLocale } from "@/context/locale-context";
 import { Button } from "@/components/ui/button";
 import { DownloadReport } from "./download-report";
+import type { TranslationKey } from "@/lib/i18n";
 
 const TABS = [
-  { key: "overview", label: "Overview" },
-  { key: "students", label: "Students" },
-  { key: "growth", label: "Growth" },
-  { key: "trials", label: "Trials" },
-  { key: "actions", label: "Take Action" },
+  { key: "overview", labelKey: "tabOverview" as TranslationKey },
+  { key: "students", labelKey: "tabStudents" as TranslationKey },
+  { key: "growth", labelKey: "tabGrowth" as TranslationKey },
+  { key: "trials", labelKey: "tabTrials" as TranslationKey },
+  { key: "actions", labelKey: "tabActions" as TranslationKey },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -26,6 +28,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
   const [isExporting, setIsExporting] = useState(false);
   const { reset } = useData();
+  const { t } = useLocale();
   const router = useRouter();
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -35,14 +38,14 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
     <div className="min-h-screen bg-gray-50">
       {demoBanner ? (
         <div className="bg-[hsl(var(--preply-pink-light))] text-center py-2 text-sm">
-          This is sample data. Upload yours to see your real insights.
+          {t("demoBanner")}
         </div>
       ) : (
         <div className="bg-emerald-50 text-center py-2 text-sm text-emerald-700 flex items-center justify-center gap-2">
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          Your data was processed entirely in your browser. Nothing was sent, saved, or stored anywhere.
+          {t("dashboardPrivacy")}
         </div>
       )}
       <header className="bg-white border-b sticky top-0 z-10">
@@ -53,7 +56,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
             </h1>
             <div className="flex items-center gap-3">
               <DownloadReport exportRef={exportRef} onExportStateChange={setIsExporting} />
-              <Button variant="ghost" size="sm" onClick={handleReset}>Upload New File</Button>
+              <Button variant="ghost" size="sm" onClick={handleReset}>{t("uploadNewFile")}</Button>
             </div>
           </div>
           <nav className="flex gap-1 -mb-px">
@@ -67,7 +70,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
                     : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </nav>
@@ -86,7 +89,7 @@ export function DashboardLayout({ tabs, demoBanner }: DashboardLayoutProps) {
           {TABS.map((tab) => (
             <div key={tab.key} className="px-8 py-8">
               <h2 className="text-2xl font-bold font-[family-name:var(--font-dm-sans)] mb-6 pb-3 border-b border-gray-200">
-                {tab.label}
+                {t(tab.labelKey)}
               </h2>
               {tabs[tab.key]}
             </div>

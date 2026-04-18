@@ -1,5 +1,6 @@
 import { Hero } from "@/components/landing/hero";
 import { CoffeeButton } from "@/components/landing/coffee-button";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { DemoSection } from "@/components/landing/demo-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { UploadSection } from "@/components/landing/upload-section";
@@ -11,6 +12,7 @@ export default async function HomePage() {
 
   return (
     <main>
+      <LanguageSwitcher />
       <CoffeeButton />
       <Hero />
       <DemoSection />
