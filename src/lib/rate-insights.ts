@@ -1,4 +1,4 @@
-import type { RawLesson, StudentSummary, RateTimelinePoint, RateBucket } from "./types";
+import type { RawLesson, StudentSummary, RateTimelinePoint, RateBucket, RateHeadline } from "./types";
 
 function getMonthKey(date: Date): string {
   const y = date.getFullYear();
@@ -159,4 +159,26 @@ export function computeRateBuckets(
   });
 
   return { buckets, bucketMode: "quartile" };
+}
+
+export function computeRateHeadline(buckets: RateBucket[]): RateHeadline | null {
+  const qualifying = buckets.filter((b) => b.trials >= 5);
+  if (qualifying.length < 2) return null;
+
+  const byPrice = [...qualifying].sort((a, b) => a.minPrice - b.minPrice);
+  const lowPriced = byPrice[0];
+  const highPriced = byPrice[byPrice.length - 1];
+
+  const delta = highPriced.conversionRate - lowPriced.conversionRate;
+  if (Math.abs(delta) < 0.05) return null;
+
+  const pct = (r: number) => `${Math.round(r * 100)}%`;
+  const body =
+    `Your trials converted at ${pct(highPriced.conversionRate)} at ${highPriced.label} ` +
+    `and ${pct(lowPriced.conversionRate)} at ${lowPriced.label} ` +
+    `(n=${highPriced.trials}/${lowPriced.trials}).`;
+
+  const type: RateHeadline["type"] = delta < 0 ? "warning" : "success";
+
+  return { body, type };
 }

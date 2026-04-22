@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { computeRateTimeline, computeRateBuckets } from "@/lib/rate-insights";
-import type { RawLesson, StudentSummary } from "@/lib/types";
+import { computeRateTimeline, computeRateBuckets, computeRateHeadline } from "@/lib/rate-insights";
+import type { RawLesson, StudentSummary, RateBucket } from "@/lib/types";
 
 function mkLesson(overrides: Partial<RawLesson>): RawLesson {
   return {
@@ -174,5 +174,66 @@ describe("computeRateBuckets", () => {
     const result = computeRateBuckets([], []);
     expect(result.buckets).toEqual([]);
     expect(result.bucketMode).toBe("discrete");
+  });
+});
+
+function mkBucket(o: Partial<RateBucket>): RateBucket {
+  return {
+    label: "$20",
+    minPrice: 20,
+    maxPrice: 20,
+    trials: 10,
+    conversions: 5,
+    conversionRate: 0.5,
+    ...o,
+  };
+}
+
+describe("computeRateHeadline", () => {
+  it("returns null when fewer than 2 qualifying buckets", () => {
+    expect(computeRateHeadline([mkBucket({ trials: 10, conversionRate: 0.5 })])).toBeNull();
+    expect(
+      computeRateHeadline([
+        mkBucket({ label: "$20", minPrice: 20, maxPrice: 20, trials: 10 }),
+        mkBucket({ label: "$30", minPrice: 30, maxPrice: 30, trials: 3 }),
+      ])
+    ).toBeNull();
+  });
+
+  it("returns null when the delta is under 5 percentage points", () => {
+    const buckets: RateBucket[] = [
+      mkBucket({ label: "$20", minPrice: 20, maxPrice: 20, trials: 10, conversionRate: 0.5 }),
+      mkBucket({ label: "$30", minPrice: 30, maxPrice: 30, trials: 10, conversionRate: 0.53 }),
+    ];
+    expect(computeRateHeadline(buckets)).toBeNull();
+  });
+
+  it('returns "warning" type when higher price has lower conversion', () => {
+    const buckets: RateBucket[] = [
+      mkBucket({ label: "$20", minPrice: 20, maxPrice: 20, trials: 10, conversions: 8, conversionRate: 0.8 }),
+      mkBucket({ label: "$30", minPrice: 30, maxPrice: 30, trials: 10, conversions: 3, conversionRate: 0.3 }),
+    ];
+    const h = computeRateHeadline(buckets);
+    expect(h?.type).toBe("warning");
+    expect(h?.body).toContain("$20");
+    expect(h?.body).toContain("$30");
+    expect(h?.body).toContain("10");
+  });
+
+  it('returns "success" type when higher price has higher conversion', () => {
+    const buckets: RateBucket[] = [
+      mkBucket({ label: "$20", minPrice: 20, maxPrice: 20, trials: 10, conversions: 3, conversionRate: 0.3 }),
+      mkBucket({ label: "$30", minPrice: 30, maxPrice: 30, trials: 10, conversions: 8, conversionRate: 0.8 }),
+    ];
+    const h = computeRateHeadline(buckets);
+    expect(h?.type).toBe("success");
+  });
+
+  it("returns null when all qualifying buckets have identical conversion rates", () => {
+    const buckets: RateBucket[] = [
+      mkBucket({ label: "$20", minPrice: 20, maxPrice: 20, trials: 10, conversions: 10, conversionRate: 1 }),
+      mkBucket({ label: "$30", minPrice: 30, maxPrice: 30, trials: 10, conversions: 10, conversionRate: 1 }),
+    ];
+    expect(computeRateHeadline(buckets)).toBeNull();
   });
 });
