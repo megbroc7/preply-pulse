@@ -18,26 +18,6 @@ export function computeRateTimeline(
 
   const converted = buildConvertedMap(students);
 
-  const firstLessonByStudent = new Map<string, Date>();
-  for (const lesson of raw) {
-    const existing = firstLessonByStudent.get(lesson.student);
-    if (!existing || lesson.lessonDate.getTime() < existing.getTime()) {
-      firstLessonByStudent.set(lesson.student, lesson.lessonDate);
-    }
-  }
-
-  const firstPaidByStudent = new Map<string, { date: Date; price: number }>();
-  for (const lesson of raw) {
-    if (lesson.type !== "Non-trial lesson") continue;
-    const existing = firstPaidByStudent.get(lesson.student);
-    if (!existing || lesson.lessonDate.getTime() < existing.date.getTime()) {
-      firstPaidByStudent.set(lesson.student, {
-        date: lesson.lessonDate,
-        price: lesson.lessonPriceUSD,
-      });
-    }
-  }
-
   const byMonth = new Map<string, RawLesson[]>();
   for (const lesson of raw) {
     const key = getMonthKey(lesson.lessonDate);
@@ -50,25 +30,14 @@ export function computeRateTimeline(
   for (const monthKey of [...byMonth.keys()].sort()) {
     const monthLessons = byMonth.get(monthKey)!;
     const trials = monthLessons.filter((l) => l.type === "Trial");
+    const paid = monthLessons.filter((l) => l.type === "Non-trial lesson");
 
-    const newStudents = new Set<string>();
-    for (const lesson of monthLessons) {
-      if (getMonthKey(firstLessonByStudent.get(lesson.student)!) === monthKey) {
-        newStudents.add(lesson.student);
-      }
-    }
+    if (trials.length === 0 && paid.length === 0) continue;
 
-    if (trials.length === 0 && newStudents.size === 0) continue;
-
-    const newStudentPrices: number[] = [];
-    for (const s of newStudents) {
-      const fp = firstPaidByStudent.get(s);
-      if (fp) newStudentPrices.push(fp.price);
-    }
-    const newStudentAvgPrice =
-      newStudentPrices.length > 0
-        ? newStudentPrices.reduce((a, b) => a + b, 0) / newStudentPrices.length
-        : null;
+    // Set rate = max paid-lesson price in the month. Max strips 30-min half-price
+    // lessons and legacy rates (both are always ≤ current set rate on Preply).
+    const setRate =
+      paid.length > 0 ? Math.max(...paid.map((l) => l.lessonPriceUSD)) : null;
 
     let trialConversionRate: number | null = null;
     if (trials.length >= 3) {
@@ -78,10 +47,10 @@ export function computeRateTimeline(
 
     points.push({
       month: monthKey,
-      newStudentAvgPrice,
+      setRate,
       trialConversionRate,
       trialCount: trials.length,
-      newStudentCount: newStudents.size,
+      paidLessonCount: paid.length,
     });
   }
 

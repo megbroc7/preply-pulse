@@ -47,24 +47,24 @@ export function RateConversionTimeline({ timeline }: RateConversionTimelineProps
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(value: any, name: any) => {
               if (value === null || value === undefined) return ["-", name];
-              if (name === "Asking rate") return [formatCurrency(value as number), name];
+              if (name === "Set rate") return [formatCurrency(value as number), name];
               if (name === "Trial conversion") return [`${(value as number).toFixed(0)}%`, name];
               return [value, name];
             }}
             labelFormatter={(label, payload) => {
               const p = payload?.[0]?.payload as
-                | { trialCount?: number; newStudentCount?: number }
+                | { trialCount?: number; paidLessonCount?: number }
                 | undefined;
               if (!p) return label as string;
-              return `${label} — trials: ${p.trialCount ?? 0}, new students: ${p.newStudentCount ?? 0}`;
+              return `${label} — trials: ${p.trialCount ?? 0}, paid lessons: ${p.paidLessonCount ?? 0}`;
             }}
           />
           <Legend />
           <Line
             yAxisId="price"
             type="monotone"
-            dataKey="newStudentAvgPrice"
-            name="Asking rate"
+            dataKey="setRate"
+            name="Set rate"
             stroke="hsl(210, 40%, 50%)"
             strokeWidth={2}
             dot={{ r: 3 }}
@@ -83,7 +83,7 @@ export function RateConversionTimeline({ timeline }: RateConversionTimelineProps
         </ComposedChart>
       </ResponsiveContainer>
       <p className="text-xs text-muted-foreground">
-        Rate = avg first-paid-lesson price for students who joined that month. Months with fewer than 3 trials show no conversion point.
+        Set rate = highest paid-lesson price seen that month (30-minute lessons and legacy student rates are always lower, so the max strips that noise). Months with fewer than 3 trials show no conversion point.
       </p>
     </div>
   );

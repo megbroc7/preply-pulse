@@ -31,7 +31,7 @@ This feature adds a new section to the Trials tab that shows:
 
 ## Key Definitions
 
-- **"Rate" on the timeline**: For each calendar month, the average first-paid-lesson price across students whose *first-ever lesson* (trial or paid) fell in that month. This proxies the tutor's asking rate for new students at that time and reacts faster than the aggregate `monthlyTrends.avgPriceUSD`.
+- **"Rate" on the timeline**: For each calendar month, the **maximum paid-lesson price** observed in that month. Preply tutors set a single rate and cannot run promotions, so the only sources of per-lesson price variance are (1) 30-minute lessons billed at half the hourly rate and (2) legacy rates locked in with old students before a price increase. Both are always *lower* than the current set rate, so the monthly `max(lessonPriceUSD)` across paid lessons reliably recovers the rate the tutor was actually asking that month.
 - **"Rate" in the bucket view**: The actual `lessonPriceUSD` charged for each trial lesson.
 - **Trial conversion**: Student-level, matching existing codebase semantics (`process-data.ts:206`). A trial is "converted" iff its student has `paidLessons > 0`. A student with multiple trials contributes each trial separately to the bucket view, but all share the same conversion outcome.
 

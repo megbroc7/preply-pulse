@@ -40,25 +40,35 @@ function mkStudent(overrides: Partial<StudentSummary>): StudentSummary {
 }
 
 describe("computeRateTimeline", () => {
-  it("reflects a mid-stream rate change in newStudentAvgPrice", () => {
+  it("reflects a mid-stream rate change in setRate", () => {
     const raw: RawLesson[] = [
-      mkLesson({ student: "A", lessonDate: new Date(2025, 0, 5), type: "Trial", lessonPriceUSD: 10 }),
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
-      mkLesson({ student: "B", lessonDate: new Date(2025, 1, 5), type: "Trial", lessonPriceUSD: 10 }),
       mkLesson({ student: "B", lessonDate: new Date(2025, 1, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
-      mkLesson({ student: "C", lessonDate: new Date(2025, 2, 5), type: "Trial", lessonPriceUSD: 12 }),
       mkLesson({ student: "C", lessonDate: new Date(2025, 2, 10), type: "Non-trial lesson", lessonPriceUSD: 25 }),
     ];
     const students: StudentSummary[] = [
-      mkStudent({ student: "A", paidLessons: 1, trials: 1 }),
-      mkStudent({ student: "B", paidLessons: 1, trials: 1 }),
-      mkStudent({ student: "C", paidLessons: 1, trials: 1 }),
+      mkStudent({ student: "A", paidLessons: 1 }),
+      mkStudent({ student: "B", paidLessons: 1 }),
+      mkStudent({ student: "C", paidLessons: 1 }),
     ];
     const result = computeRateTimeline(raw, students);
-    const jan = result.find((p) => p.month === "2025-01");
-    const mar = result.find((p) => p.month === "2025-03");
-    expect(jan?.newStudentAvgPrice).toBe(20);
-    expect(mar?.newStudentAvgPrice).toBe(25);
+    expect(result.find((p) => p.month === "2025-01")?.setRate).toBe(20);
+    expect(result.find((p) => p.month === "2025-03")?.setRate).toBe(25);
+  });
+
+  it("uses monthly max so 30-minute half-price lessons do not drag it down", () => {
+    // Full rate $74. One new student books a 30-minute first lesson at $37.
+    // Plus a returning student at full rate $74.
+    const raw: RawLesson[] = [
+      mkLesson({ student: "NEW", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 37 }),
+      mkLesson({ student: "RET", lessonDate: new Date(2025, 0, 20), type: "Non-trial lesson", lessonPriceUSD: 74 }),
+    ];
+    const students: StudentSummary[] = [
+      mkStudent({ student: "NEW", paidLessons: 1 }),
+      mkStudent({ student: "RET", paidLessons: 1 }),
+    ];
+    const result = computeRateTimeline(raw, students);
+    expect(result[0].setRate).toBe(74);
   });
 
   it("returns null trialConversionRate when trialCount < 3", () => {
@@ -76,16 +86,18 @@ describe("computeRateTimeline", () => {
     expect(jan?.trialConversionRate).toBeNull();
   });
 
-  it("returns null newStudentAvgPrice when new students have no paid lessons yet", () => {
+  it("returns null setRate when the month has no paid lessons", () => {
     const raw: RawLesson[] = [
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 5), type: "Trial" }),
     ];
     const students: StudentSummary[] = [mkStudent({ student: "A", trials: 1, paidLessons: 0 })];
     const result = computeRateTimeline(raw, students);
-    expect(result[0].newStudentAvgPrice).toBeNull();
+    expect(result[0].setRate).toBeNull();
+    expect(result[0].paidLessonCount).toBe(0);
   });
 
-  it("omits months with no trials and no new students", () => {
+  it("includes months with paid lessons but no trials", () => {
+    // Returning-student months should render a rate point even without trials.
     const raw: RawLesson[] = [
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 5), type: "Trial" }),
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
@@ -93,7 +105,9 @@ describe("computeRateTimeline", () => {
     ];
     const students: StudentSummary[] = [mkStudent({ student: "A", trials: 1, paidLessons: 2 })];
     const result = computeRateTimeline(raw, students);
-    expect(result.map((p) => p.month)).toEqual(["2025-01"]);
+    expect(result.map((p) => p.month)).toEqual(["2025-01", "2025-03"]);
+    expect(result[1].setRate).toBe(20);
+    expect(result[1].trialCount).toBe(0);
   });
 
   it("returns empty array for empty input", () => {

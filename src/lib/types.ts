@@ -179,10 +179,10 @@ export interface ProcessedData {
 
 export interface RateTimelinePoint {
   month: string;
-  newStudentAvgPrice: number | null;
+  setRate: number | null;
   trialConversionRate: number | null;
   trialCount: number;
-  newStudentCount: number;
+  paidLessonCount: number;
 }
 
 export interface RateBucket {
