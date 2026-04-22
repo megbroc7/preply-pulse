@@ -10,6 +10,22 @@ function buildConvertedMap(students: StudentSummary[]): Map<string, boolean> {
   return new Map(students.map((s) => [s.student, s.paidLessons > 0]));
 }
 
+/**
+ * Set rate for a month = second-highest first-paid-lesson price among students
+ * whose first lesson fell in the 90 days ending at that month. New-students-only
+ * dodges legacy-rate contamination; second-highest dodges the occasional
+ * block-booking outlier (2-hour or 2.5-hour bookings billed as one lesson).
+ * Falls back to the single value when only one new student in the window.
+ */
+function secondHighestOrOnly(prices: number[]): number | null {
+  if (prices.length === 0) return null;
+  if (prices.length === 1) return prices[0];
+  const sorted = [...prices].sort((a, b) => b - a);
+  return sorted[1];
+}
+
+const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+
 export function computeRateTimeline(
   raw: RawLesson[],
   students: StudentSummary[]
@@ -17,6 +33,25 @@ export function computeRateTimeline(
   if (raw.length === 0) return [];
 
   const converted = buildConvertedMap(students);
+
+  // First-ever lesson date per student (for new-student identification)
+  const firstLessonByStudent = new Map<string, Date>();
+  for (const lesson of raw) {
+    const existing = firstLessonByStudent.get(lesson.student);
+    if (!existing || lesson.lessonDate.getTime() < existing.getTime()) {
+      firstLessonByStudent.set(lesson.student, lesson.lessonDate);
+    }
+  }
+
+  // First paid-lesson price per student
+  const firstPaidPriceByStudent = new Map<string, number>();
+  for (const lesson of raw) {
+    if (lesson.type !== "Non-trial lesson") continue;
+    const existing = firstPaidPriceByStudent.get(lesson.student);
+    if (existing === undefined) {
+      firstPaidPriceByStudent.set(lesson.student, lesson.lessonPriceUSD);
+    }
+  }
 
   const byMonth = new Map<string, RawLesson[]>();
   for (const lesson of raw) {
@@ -34,10 +69,21 @@ export function computeRateTimeline(
 
     if (trials.length === 0 && paid.length === 0) continue;
 
-    // Set rate = max paid-lesson price in the month. Max strips 30-min half-price
-    // lessons and legacy rates (both are always ≤ current set rate on Preply).
-    const setRate =
-      paid.length > 0 ? Math.max(...paid.map((l) => l.lessonPriceUSD)) : null;
+    // Set rate: rolling 90-day window ending at end of month. Collect first-paid
+    // prices for students whose first-ever lesson fell in that window, then take
+    // the second-highest (or only value). See secondHighestOrOnly for why.
+    const [year, mm] = monthKey.split("-").map(Number);
+    const monthEnd = new Date(year, mm, 1); // first day of NEXT month → exclusive upper bound
+    const windowStart = monthEnd.getTime() - NINETY_DAYS_MS;
+    const windowPrices: number[] = [];
+    for (const [student, firstDate] of firstLessonByStudent) {
+      const t = firstDate.getTime();
+      if (t >= windowStart && t < monthEnd.getTime()) {
+        const fp = firstPaidPriceByStudent.get(student);
+        if (fp !== undefined) windowPrices.push(fp);
+      }
+    }
+    const setRate = secondHighestOrOnly(windowPrices);
 
     let trialConversionRate: number | null = null;
     if (trials.length >= 3) {

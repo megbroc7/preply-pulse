@@ -83,7 +83,7 @@ export function RateConversionTimeline({ timeline }: RateConversionTimelineProps
         </ComposedChart>
       </ResponsiveContainer>
       <p className="text-xs text-muted-foreground">
-        Set rate = highest paid-lesson price seen that month (30-minute lessons and legacy student rates are always lower, so the max strips that noise). Months with fewer than 3 trials show no conversion point.
+        Set rate = what new students (first lesson within the last 90 days) were charged for their first paid lesson, taking the 2nd-highest to skip one-off block bookings. Months with fewer than 3 trials show no conversion point.
       </p>
     </div>
   );

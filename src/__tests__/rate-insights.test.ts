@@ -40,35 +40,69 @@ function mkStudent(overrides: Partial<StudentSummary>): StudentSummary {
 }
 
 describe("computeRateTimeline", () => {
-  it("reflects a mid-stream rate change in setRate", () => {
+  it("reflects a rate change by the time the new rate dominates the 90-day window", () => {
+    // Rate is $20 early, raised to $25 mid-February. 2nd-max requires >=2
+    // new students at the new rate before it wins.
     const raw: RawLesson[] = [
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
-      mkLesson({ student: "B", lessonDate: new Date(2025, 1, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
-      mkLesson({ student: "C", lessonDate: new Date(2025, 2, 10), type: "Non-trial lesson", lessonPriceUSD: 25 }),
+      mkLesson({ student: "B", lessonDate: new Date(2025, 0, 20), type: "Non-trial lesson", lessonPriceUSD: 20 }),
+      // Many new students at $25 in late Feb and March
+      mkLesson({ student: "C", lessonDate: new Date(2025, 1, 15), type: "Non-trial lesson", lessonPriceUSD: 25 }),
+      mkLesson({ student: "D", lessonDate: new Date(2025, 1, 20), type: "Non-trial lesson", lessonPriceUSD: 25 }),
+      mkLesson({ student: "E", lessonDate: new Date(2025, 2, 5), type: "Non-trial lesson", lessonPriceUSD: 25 }),
+      mkLesson({ student: "F", lessonDate: new Date(2025, 2, 15), type: "Non-trial lesson", lessonPriceUSD: 25 }),
     ];
     const students: StudentSummary[] = [
       mkStudent({ student: "A", paidLessons: 1 }),
       mkStudent({ student: "B", paidLessons: 1 }),
       mkStudent({ student: "C", paidLessons: 1 }),
+      mkStudent({ student: "D", paidLessons: 1 }),
+      mkStudent({ student: "E", paidLessons: 1 }),
+      mkStudent({ student: "F", paidLessons: 1 }),
     ];
     const result = computeRateTimeline(raw, students);
+    // Jan: only $20 new students exist → $20
     expect(result.find((p) => p.month === "2025-01")?.setRate).toBe(20);
+    // March: 90-day window has [20, 20, 25, 25, 25, 25] → 2nd-highest = 25
     expect(result.find((p) => p.month === "2025-03")?.setRate).toBe(25);
   });
 
-  it("uses monthly max so 30-minute half-price lessons do not drag it down", () => {
-    // Full rate $74. One new student books a 30-minute first lesson at $37.
-    // Plus a returning student at full rate $74.
+  it("ignores a one-off new-student block booking via 2nd-highest selection", () => {
+    // Set rate $53. Three new students pay $53 for their first paid lesson,
+    // one new student's first paid is a 2-hour block at $106. 2nd-max = $53.
     const raw: RawLesson[] = [
-      mkLesson({ student: "NEW", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 37 }),
-      mkLesson({ student: "RET", lessonDate: new Date(2025, 0, 20), type: "Non-trial lesson", lessonPriceUSD: 74 }),
+      mkLesson({ student: "A", lessonDate: new Date(2025, 0, 3), type: "Non-trial lesson", lessonPriceUSD: 53 }),
+      mkLesson({ student: "B", lessonDate: new Date(2025, 0, 6), type: "Non-trial lesson", lessonPriceUSD: 53 }),
+      mkLesson({ student: "C", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 53 }),
+      mkLesson({ student: "D", lessonDate: new Date(2025, 0, 15), type: "Non-trial lesson", lessonPriceUSD: 106 }),
     ];
     const students: StudentSummary[] = [
-      mkStudent({ student: "NEW", paidLessons: 1 }),
-      mkStudent({ student: "RET", paidLessons: 1 }),
+      mkStudent({ student: "A", paidLessons: 1 }),
+      mkStudent({ student: "B", paidLessons: 1 }),
+      mkStudent({ student: "C", paidLessons: 1 }),
+      mkStudent({ student: "D", paidLessons: 1 }),
     ];
     const result = computeRateTimeline(raw, students);
-    expect(result[0].setRate).toBe(74);
+    expect(result[0].setRate).toBe(53);
+  });
+
+  it("is immune to legacy student rates (only looks at new students)", () => {
+    // Student A joined Sep 2024 at $20 and still pays $20 in Jan 2025.
+    // New student B joins Jan 2025 at $53. The set rate for Jan should be $53.
+    const raw: RawLesson[] = [
+      mkLesson({ student: "A", lessonDate: new Date(2024, 8, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
+      mkLesson({ student: "A", lessonDate: new Date(2025, 0, 5), type: "Non-trial lesson", lessonPriceUSD: 20 }),
+      mkLesson({ student: "A", lessonDate: new Date(2025, 0, 12), type: "Non-trial lesson", lessonPriceUSD: 20 }),
+      mkLesson({ student: "B", lessonDate: new Date(2025, 0, 15), type: "Non-trial lesson", lessonPriceUSD: 53 }),
+    ];
+    const students: StudentSummary[] = [
+      mkStudent({ student: "A", paidLessons: 3 }),
+      mkStudent({ student: "B", paidLessons: 1 }),
+    ];
+    const result = computeRateTimeline(raw, students);
+    // Jan: A is not new (joined Sep 2024, outside 90d window from end of Jan),
+    // so only B counts. Single value → 53.
+    expect(result.find((p) => p.month === "2025-01")?.setRate).toBe(53);
   });
 
   it("returns null trialConversionRate when trialCount < 3", () => {
@@ -86,7 +120,8 @@ describe("computeRateTimeline", () => {
     expect(jan?.trialConversionRate).toBeNull();
   });
 
-  it("returns null setRate when the month has no paid lessons", () => {
+  it("returns null setRate when no new students with paid lessons fall in the 90-day window", () => {
+    // Trials-only month with no new students who took a paid lesson.
     const raw: RawLesson[] = [
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 5), type: "Trial" }),
     ];
@@ -97,7 +132,6 @@ describe("computeRateTimeline", () => {
   });
 
   it("includes months with paid lessons but no trials", () => {
-    // Returning-student months should render a rate point even without trials.
     const raw: RawLesson[] = [
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 5), type: "Trial" }),
       mkLesson({ student: "A", lessonDate: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 20 }),
@@ -106,6 +140,7 @@ describe("computeRateTimeline", () => {
     const students: StudentSummary[] = [mkStudent({ student: "A", trials: 1, paidLessons: 2 })];
     const result = computeRateTimeline(raw, students);
     expect(result.map((p) => p.month)).toEqual(["2025-01", "2025-03"]);
+    // March: A joined Jan 5, which is within 90 days of end-of-March.
     expect(result[1].setRate).toBe(20);
     expect(result[1].trialCount).toBe(0);
   });
