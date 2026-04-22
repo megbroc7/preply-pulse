@@ -161,6 +161,7 @@ export interface ProcessedData {
   seasonality: SeasonalityPoint[];
   revenueForecast: RevenueForecast;
   ltvCurve: LTVPoint[];
+  rateInsights: RateInsights;
   insights: InsightCallout[];
   reportPeriod: { start: Date; end: Date };
   totalStudents: number;
@@ -174,6 +175,35 @@ export interface ProcessedData {
   medianPaidLessonsPerStudent: number;
   studentsActiveIn30d: number;
   studentsDormant180d: number;
+}
+
+export interface RateTimelinePoint {
+  month: string;
+  newStudentAvgPrice: number | null;
+  trialConversionRate: number | null;
+  trialCount: number;
+  newStudentCount: number;
+}
+
+export interface RateBucket {
+  label: string;
+  minPrice: number;
+  maxPrice: number;
+  trials: number;
+  conversions: number;
+  conversionRate: number;
+}
+
+export interface RateHeadline {
+  body: string;
+  type: "info" | "success" | "warning";
+}
+
+export interface RateInsights {
+  timeline: RateTimelinePoint[];
+  buckets: RateBucket[];
+  bucketMode: "discrete" | "quartile";
+  headline: RateHeadline | null;
 }
 
 export interface ThresholdResult {
