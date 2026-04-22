@@ -1,4 +1,4 @@
-import type { RawLesson, StudentSummary, RateTimelinePoint, RateBucket, RateHeadline } from "./types";
+import type { RawLesson, StudentSummary, RateTimelinePoint, RateBucket, RateHeadline, RateInsights } from "./types";
 
 function getMonthKey(date: Date): string {
   const y = date.getFullYear();
@@ -181,4 +181,14 @@ export function computeRateHeadline(buckets: RateBucket[]): RateHeadline | null 
   const type: RateHeadline["type"] = delta < 0 ? "warning" : "success";
 
   return { body, type };
+}
+
+export function computeRateInsights(
+  raw: RawLesson[],
+  students: StudentSummary[]
+): RateInsights {
+  const timeline = computeRateTimeline(raw, students);
+  const { buckets, bucketMode } = computeRateBuckets(raw, students);
+  const headline = computeRateHeadline(buckets);
+  return { timeline, buckets, bucketMode, headline };
 }

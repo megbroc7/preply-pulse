@@ -20,6 +20,7 @@ import {
   computeLTVCurve,
   generateInsights,
 } from "./compute-insights";
+import { computeRateInsights } from "./rate-insights";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -446,6 +447,7 @@ export function processData(lessons: RawLesson[]): ProcessedData {
   const seasonality = computeSeasonality(monthlyTrends);
   const revenueForecast = computeRevenueForecast(students, sorted, now);
   const ltvCurve = computeLTVCurve(sorted);
+  const rateInsights = computeRateInsights(sorted, students);
 
   const insights = generateInsights({
     students,
@@ -469,6 +471,7 @@ export function processData(lessons: RawLesson[]): ProcessedData {
     seasonality,
     revenueForecast,
     ltvCurve,
+    rateInsights,
     insights,
     reportPeriod,
     totalStudents,

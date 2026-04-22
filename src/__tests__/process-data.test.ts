@@ -94,3 +94,17 @@ describe("processData", () => {
     expect(result.scheduling.byWeekday.length).toBe(7);
   });
 });
+
+describe("processData rateInsights", () => {
+  it("includes rateInsights on the returned ProcessedData", () => {
+    const lessons: RawLesson[] = [
+      { serviceType: "Preply Marketplace", student: "A", studentLocation: "US", lessonDate: new Date(2025, 0, 5), dateConfirmed: new Date(2025, 0, 5), type: "Trial", lessonPriceUSD: 10, tutorPayoutPercent: 72, earningUSD: 0 },
+      { serviceType: "Preply Marketplace", student: "A", studentLocation: "US", lessonDate: new Date(2025, 0, 10), dateConfirmed: new Date(2025, 0, 10), type: "Non-trial lesson", lessonPriceUSD: 20, tutorPayoutPercent: 72, earningUSD: 14 },
+    ];
+    const result = processData(lessons);
+    expect(result.rateInsights).toBeDefined();
+    expect(Array.isArray(result.rateInsights.timeline)).toBe(true);
+    expect(Array.isArray(result.rateInsights.buckets)).toBe(true);
+    expect(["discrete", "quartile"]).toContain(result.rateInsights.bucketMode);
+  });
+});
