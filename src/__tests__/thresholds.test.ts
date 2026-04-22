@@ -56,3 +56,29 @@ describe("checkThreshold", () => {
     expect(notEnough.met).toBe(false);
   });
 });
+
+describe("checkThreshold rateConversion", () => {
+  it("is not met when trials < 20", () => {
+    const data = { trialFunnel: { totalTrials: 10 }, monthlyTrends: [] } as unknown as ProcessedData;
+    const result = checkThreshold("rateConversion", data);
+    expect(result.met).toBe(false);
+  });
+
+  it("is not met when monthlyTrends.length < 6", () => {
+    const data = {
+      trialFunnel: { totalTrials: 25 },
+      monthlyTrends: new Array(3).fill({ month: "2025-01" }),
+    } as unknown as ProcessedData;
+    const result = checkThreshold("rateConversion", data);
+    expect(result.met).toBe(false);
+  });
+
+  it("is met with >=20 trials and >=6 months", () => {
+    const data = {
+      trialFunnel: { totalTrials: 30 },
+      monthlyTrends: new Array(6).fill({ month: "2025-01" }),
+    } as unknown as ProcessedData;
+    const result = checkThreshold("rateConversion", data);
+    expect(result.met).toBe(true);
+  });
+});

@@ -6,7 +6,8 @@ type ViewKey =
   | "monthlyTrends" | "concentrationRisk"
   | "healthScores" | "reactivation" | "pricing"
   | "ltvCurve" | "revenueForecast"
-  | "seasonality";
+  | "seasonality"
+  | "rateConversion";
 
 function monthCount(data: ProcessedData): number {
   return data.monthlyTrends.length;
@@ -61,6 +62,15 @@ export function checkThreshold(view: ViewKey, data: ProcessedData): ThresholdRes
     case "seasonality":
       if (monthCount(data) < 6) {
         return { met: false, message: `Seasonality patterns need at least 6 months of data. You have ${monthCount(data)} months so far.` };
+      }
+      return { met: true, message: "" };
+
+    case "rateConversion":
+      if (data.trialFunnel.totalTrials < 20 || monthCount(data) < 6) {
+        return {
+          met: false,
+          message: `This view needs at least 20 trials and 6 months of data. You have ${data.trialFunnel.totalTrials} trials over ${monthCount(data)} months.`,
+        };
       }
       return { met: true, message: "" };
 
