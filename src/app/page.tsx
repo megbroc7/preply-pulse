@@ -5,10 +5,12 @@ import { DemoSection } from "@/components/landing/demo-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { UploadSection } from "@/components/landing/upload-section";
 import { Footer } from "@/components/landing/footer";
+import { getDeployedCommitSha } from "@/lib/deployed-commit";
 import { fetchPreplyStats } from "@/lib/preply-stats";
 
 export default async function HomePage() {
   const stats = await fetchPreplyStats();
+  const sourceCommitSha = getDeployedCommitSha();
 
   return (
     <main>
@@ -18,7 +20,7 @@ export default async function HomePage() {
       <DemoSection />
       <HowItWorks />
       <UploadSection />
-      <Footer lessonCount={stats.lessonCount} />
+      <Footer lessonCount={stats.lessonCount} sourceCommitSha={sourceCommitSha} />
     </main>
   );
 }

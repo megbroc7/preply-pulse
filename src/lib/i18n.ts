@@ -123,6 +123,9 @@ const translations = {
     builtBy: "Built by Megan B.",
     footerLessons: "lessons taught who built this tool so you don't have to figure out the business side alone.",
     footerBuyMeCoffee: "Buy me a coffee",
+    footerPrivacy: "Privacy & verification",
+    footerSource: "View source",
+    footerCommit: "Deployed commit",
     footerReddit: "Read the Reddit post",
     footerDisclaimer: "PreplyPulse is not affiliated with Preply. Your data is processed entirely in your browser.",
 
@@ -248,6 +251,9 @@ const translations = {
     builtBy: "Creado por Megan B.",
     footerLessons: "lecciones impartidas, quien creo esta herramienta para que no tengas que descifrar el lado empresarial solo/a.",
     footerBuyMeCoffee: "Invitame un cafe",
+    footerPrivacy: "Privacidad y verificacion",
+    footerSource: "Ver codigo fuente",
+    footerCommit: "Commit desplegado",
     footerReddit: "Lee el post en Reddit",
     footerDisclaimer: "PreplyPulse no esta afiliado a Preply. Tus datos se procesan completamente en tu navegador.",
 

@@ -1,15 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { track } from "@vercel/analytics/react";
 import { useLocale } from "@/context/locale-context";
+import { getSourceCommitUrl, SOURCE_REPO_URL, SOURCE_COMMIT_FALLBACK_SHA } from "@/lib/source-links";
 
 interface FooterProps {
   lessonCount?: number;
+  sourceCommitSha?: string;
 }
 
-export function Footer({ lessonCount }: FooterProps) {
+export function Footer({ lessonCount, sourceCommitSha = SOURCE_COMMIT_FALLBACK_SHA }: FooterProps) {
   const { t } = useLocale();
   const count = lessonCount ? lessonCount.toLocaleString("en-US") : "2,000+";
+  const shortCommitSha = sourceCommitSha.slice(0, 7);
 
   return (
     <footer className="py-16 px-4 border-t border-gray-100">
@@ -27,7 +31,7 @@ export function Footer({ lessonCount }: FooterProps) {
         <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
           A Preply tutor with {count}&nbsp;{t("footerLessons")}
         </p>
-        <div className="flex items-center justify-center gap-5 text-sm">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm">
           <a
             href="https://buymeacoffee.com/preplypulse"
             target="_blank"
@@ -42,6 +46,13 @@ export function Footer({ lessonCount }: FooterProps) {
             {t("footerBuyMeCoffee")}
           </a>
           <span className="w-px h-4 bg-gray-200" />
+          <Link
+            href="/privacy"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {t("footerPrivacy")}
+          </Link>
+          <span className="w-px h-4 bg-gray-200" />
           <a
             href="https://www.reddit.com/r/Preply/comments/1smgs0s/lessons_learned_after_2118_hours_on_preply/"
             target="_blank"
@@ -50,6 +61,24 @@ export function Footer({ lessonCount }: FooterProps) {
             className="text-gray-400 hover:text-gray-600 transition-colors"
           >
             {t("footerReddit")}
+          </a>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+          <a
+            href={SOURCE_REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {t("footerSource")}
+          </a>
+          <a
+            href={getSourceCommitUrl(sourceCommitSha)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            {t("footerCommit")} {shortCommitSha}
           </a>
         </div>
         <div className="pt-6">
