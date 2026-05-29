@@ -1,11 +1,20 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useLocale } from "@/context/locale-context";
 import { CSVUploader } from "@/components/upload/csv-uploader";
 import { CSVGuide } from "@/components/upload/csv-guide";
 
 export function UploadSection() {
   const { t } = useLocale();
+  const [guideOpen, setGuideOpen] = useState(false);
+
+  const showGuide = useCallback(() => {
+    setGuideOpen(true);
+    requestAnimationFrame(() => {
+      document.getElementById("csv-guide")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, []);
 
   return (
     <section id="upload" className="relative py-20 px-4">
@@ -20,8 +29,8 @@ export function UploadSection() {
         <p className="text-center text-gray-400 text-sm mb-10">
           {t("uploadSubtitle")}
         </p>
-        <CSVUploader />
-        <CSVGuide />
+        <CSVUploader onShowGuide={showGuide} />
+        <CSVGuide open={guideOpen} onToggle={() => setGuideOpen((v) => !v)} />
       </div>
     </section>
   );

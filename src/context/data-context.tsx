@@ -12,9 +12,10 @@ interface DataContextType {
   didReset: boolean;
   error: string | null;
   isLoading: boolean;
-  loadCSV: (csvString: string) => void;
+  loadCSV: (csvString: string) => boolean;
   loadDemo: () => void;
   reset: () => void;
+  setError: (message: string | null) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -26,15 +27,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [didReset, setDidReset] = useState(false);
 
-  const loadCSV = useCallback((csvString: string) => {
+  const loadCSV = useCallback((csvString: string): boolean => {
     setIsLoading(true);
     setError(null);
     try {
       const parseResult = parseCSV(csvString);
       if (!parseResult.success) {
         setError(parseResult.error);
-        setIsLoading(false);
-        return;
+        return false;
       }
       const processed = processData(parseResult.data);
       setData(processed);
@@ -43,8 +43,10 @@ export function DataProvider({ children }: { children: ReactNode }) {
         totalLessons: processed.totalLessons,
         totalStudents: processed.totalStudents,
       });
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "An unexpected error occurred while processing your data.");
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +75,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <DataContext.Provider value={{ data, isDemo, didReset, error, isLoading, loadCSV, loadDemo, reset }}>
+    <DataContext.Provider value={{ data, isDemo, didReset, error, isLoading, loadCSV, loadDemo, reset, setError }}>
       {children}
     </DataContext.Provider>
   );

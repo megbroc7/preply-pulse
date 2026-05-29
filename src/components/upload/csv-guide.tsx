@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { useLocale } from "@/context/locale-context";
 
-export function CSVGuide() {
-  const [isOpen, setIsOpen] = useState(false);
+export function CSVGuide({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   const { t } = useLocale();
 
   const steps = [
@@ -14,13 +12,13 @@ export function CSVGuide() {
   ];
 
   return (
-    <div className="mt-6">
+    <div id="csv-guide" className="mt-6 scroll-mt-24">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
         className="mx-auto flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors group"
       >
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? "rotate-90" : ""}`}
+          className={`w-4 h-4 transition-transform ${open ? "rotate-90" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -30,7 +28,7 @@ export function CSVGuide() {
         {t("guideToggle")}
       </button>
 
-      {isOpen && (
+      {open && (
         <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <div className="space-y-6">
             {steps.map((step) => (
