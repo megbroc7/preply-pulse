@@ -141,6 +141,13 @@ const translations = {
     insightGeo: "Geographic sweet spot",
     insightRepeatStrong: "Strong repeat booking",
     insightRepeatWeak: "Repeat booking rate",
+
+    // Error modal
+    errorTitle: "We couldn't read that file",
+    errorHelpIntro: "This usually means the file isn't your Preply activity export.",
+    errorGuideLink: "See how to export the right CSV",
+    errorDismiss: "Try another file",
+    errorWrongFormat: "That doesn't look like a CSV file. Please upload the .csv file you exported from Preply.",
   },
 
   es: {
@@ -268,6 +275,12 @@ const translations = {
     insightGeo: "Zona geografica clave",
     insightRepeatStrong: "Reservas recurrentes solidas",
     insightRepeatWeak: "Tasa de reservas recurrentes",
+
+    errorTitle: "No pudimos leer ese archivo",
+    errorHelpIntro: "Esto suele significar que el archivo no es tu exportacion de actividad de Preply.",
+    errorGuideLink: "Ve como exportar el CSV correcto",
+    errorDismiss: "Probar otro archivo",
+    errorWrongFormat: "Eso no parece un archivo CSV. Sube el archivo .csv que exportaste de Preply.",
   },
 } as const;
 
